@@ -35,10 +35,13 @@ func main() {
 
 	services := service.New(db)
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		Services: services,
-		Loaders: graph.NewLoaders(services),
-	}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			Services: services,
+			Loaders: graph.NewLoaders(services),
+		},
+		Complexity:graph.ComplexityConfig(),
+	}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -50,6 +53,7 @@ func main() {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
+	srv.Use(extension.FixedComplexityLimit(30))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
