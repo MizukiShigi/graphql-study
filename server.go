@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/MizukiShigi/graphql-study/graph"
 	"github.com/MizukiShigi/graphql-study/graph/service"
+	"github.com/MizukiShigi/graphql-study/middlewares/auth"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -38,9 +39,9 @@ func main() {
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: &graph.Resolver{
 			Services: services,
-			Loaders: graph.NewLoaders(services),
+			Loaders:  graph.NewLoaders(services),
 		},
-		Complexity:graph.ComplexityConfig(),
+		Complexity: graph.ComplexityConfig(),
 	}))
 
 	srv.AddTransport(transport.Options{})
@@ -56,7 +57,7 @@ func main() {
 	srv.Use(extension.FixedComplexityLimit(30))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", auth.AuthMiddleware(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
