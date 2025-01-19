@@ -46,3 +46,12 @@ func validateToken(token string) (string, error) {
 	}
 	return tUserName, nil
 }
+
+func GetUserName(ctx context.Context) (string, bool) {
+	switch v := ctx.Value(userNameKey{}).(type) {
+	case string:
+		return v, true
+	default:
+		return "", false
+	}
+}

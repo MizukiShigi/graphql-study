@@ -41,6 +41,7 @@ func main() {
 			Services: services,
 			Loaders:  graph.NewLoaders(services),
 		},
+		Directives: graph.Directive,
 		Complexity: graph.ComplexityConfig(),
 	}))
 
